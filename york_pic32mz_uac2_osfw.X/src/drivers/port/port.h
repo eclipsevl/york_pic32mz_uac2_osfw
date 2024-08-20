@@ -14,9 +14,9 @@ extern "C" {
 #define OSCSEL_SET_LOW()                LATDCLR = _BIT(5)          // set oscsel to low
     
 #define OSCEN_FS48_SET_LOW()                LATDCLR = _BIT(11) 
-#define OSCEN_FS44_SET_LOW()                LATDCLR = _BIT(10) 
+#define OSCEN_FS44_SET_LOW()                LATDCLR = _BIT(9) 
 #define OSCEN_FS48_SET_HIGH()               LATDSET = _BIT(11)
-#define OSCEN_FS44_SET_HIGH()               LATDSET = _BIT(10)
+#define OSCEN_FS44_SET_HIGH()               LATDSET = _BIT(9)
     
 #define FS0_SET_HIGH()                  LATBSET = _BIT(5)
 #define FS0_SET_LOW()                   LATBCLR = _BIT(5)
@@ -36,16 +36,11 @@ extern "C" {
 
 // Turn On exteral interrupt on LRCK input pin
 #define _PORT_Input_Transfer_Sync()     IEC0SET = _IEC0_INT1IE_MASK
-
-    
-    
     
 void port_init (void);
 
 
-
-
-    /* Provide C++ Compatibility */
+/* Provide C++ Compatibility */
 #ifdef __cplusplus
 }
 #endif

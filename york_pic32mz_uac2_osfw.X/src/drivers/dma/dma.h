@@ -24,7 +24,7 @@ extern "C" {
 #define _DMA_RESUME_ALL()                               DMACONbits.SUSPEND = 0
     
 /******************* Output transfer defines ********************************/
-#define _DMA_OutputSourceAddress_Set(adr)               DCH0SSA = adr
+#define _DMA_OutputSourceAddress_Set(adr)               {   DCH0SSA = adr; DCH7DSA = adr;}
 #define _DMA_InputDestinationAddress_Set(adr)           DCH5DSA = adr
 
 #define DMA_OUTPUT_TRANSFET_PTR                         DCH0SPTR

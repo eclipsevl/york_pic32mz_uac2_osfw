@@ -14,6 +14,10 @@ static uint32_t dma_buf1_adr;
 static uint32_t dma_buf4_adr;
 static uint32_t dma_dsd_mute_adr;
 
+
+// data source to fifo clear
+static uint32_t dwclr __attribute__((coherent));
+
 /*
  * dma_init()
  */
@@ -33,7 +37,6 @@ void dma_init (void)
     /* Channel 0 config - to copy data from EP1 FIFO to dmabuf                */
     /**************************************************************************/
     DCH0CONbits.CHAEN = 1;                      // Channel is continuously enabled, and not automatically disabled after a block transfer is complete
-    // Only separate fields support!!!!
     DCH0ECONbits.SIRQEN = 1;                    // Enable transfer IRQ
 
     /**************************************************************************/
@@ -46,14 +49,18 @@ void dma_init (void)
     DCH1CSIZ = 8;                               // Cell data size: channel audio data size (4 bytes)
     DCH1CONbits.CHAEN = 1;                      // Channel is continuously enabled, and not automatically disabled after a block transfer is complete
     DCH1CONbits.CHPRI = 0x1;                    // Set channel priority higher than ch0
-    // Only separate fields support!!!!
     DCH1ECONbits.CHSIRQ = _SPI1_TX_VECTOR;      // Channel Transfer Start IRQ
     DCH1ECONbits.SIRQEN = 1;                    // Enable transfer IRQ
+
+    /**************************************************************************/
+    /* Channel 7 config - to cleare fifo buf                                  */
+    /**************************************************************************/
+    dwclr = 0;
+    DCH7SSA = KVA_TO_PA( &dwclr );              // Source data start address
+    DCH7SSIZ = 4;                               // Source size
+    DCH7CONbits.CHAEN = 1;                      // Channel is continuously enabled, and not automatically disabled after a block transfer is complete 
+    DCH7ECONbits.SIRQEN = 1;                    // Enable transfer IRQ
 }
-
-
-
-
 
 /*
  * dma_output_2ch_start()
@@ -66,8 +73,15 @@ void dma_output_2ch_start (const uint16_t size)
     DCH0DSIZ = 4;                           // Destination size ( buf data size 4 bytes * 8 channels = 32 bytes )
     DCH0CSIZ = 8;                           // Cell data size: channel audio data size (4 bytes)
     DCH0ECONbits.CHSIRQ = _SPI1_TX_VECTOR;  // Channel Transfer Start IRQ    
+
+    // Config fifo clear
+    DCH7DSIZ = size;                        // Destination size ( buf data size 4 bytes * 8 channels = 32 bytes )
+    DCH7CSIZ = 8;                          // Cell data size: channel audio data size (4 bytes)
+    DCH7ECONbits.CHSIRQ = _SPI1_TX_VECTOR;  // Channel Transfer Start IRQ   
+
     // Enable DMA channel
     DCH0CONbits.CHEN = 1;
+    DCH7CONbits.CHEN = 1;
 }
 
 /*
@@ -119,12 +133,16 @@ void dma_output_stop (void)
 
     if (DCH4CONbits.CHEN)
         DCH4ECONbits.CABORT = 1;
+
+    if (DCH7CONbits.CHEN)
+        DCH7ECONbits.CABORT = 1;
         
     while (DCH0CONbits.CHBUSY);
     while (DCH1CONbits.CHBUSY);
     while (DCH2CONbits.CHBUSY);
     while (DCH3CONbits.CHBUSY);
     while (DCH4CONbits.CHBUSY);
+    while (DCH7CONbits.CHBUSY);
 }
 
 /*

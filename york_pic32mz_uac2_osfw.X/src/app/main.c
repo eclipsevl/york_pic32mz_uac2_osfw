@@ -17,7 +17,7 @@ void main (void)
     /*  When enabling the USB PLL, add a three second
         delay before turning on the USB module  */
 
-    tmr_Task_Delayed_mS_set(SYS_TASK_USB_CONNECT, 3000);
+    tmr_Task_Delayed_mS_set(SYS_TASK_USB_CONNECT, 100);
     __builtin_enable_interrupts();
 
     port_init();    
